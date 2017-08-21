@@ -41,6 +41,27 @@ tibble::tibble(
 )
 
 
-# Concatenate two strings using map ---------------------------------------
+# Concatenate two strings using map and dplyr ---------------------------------------
+
+nms=got_chars[1:10] %>% 
+  map_chr("name")
+birth=got_chars[1:10] %>% 
+  map_chr("born")
+
+
+map2_chr(nms,birth,~paste(.x,"was born",.y))
+
+# another try using tibble
+
+df=tibble::tibble(
+  nms,
+  connector="was born",
+  birth
+)
+
+pmap_chr(df,paste)
+
+
+# Summarize function of dplyr ---------------------------------------------
 
 
