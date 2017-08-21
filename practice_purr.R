@@ -64,4 +64,51 @@ pmap_chr(df,paste)
 
 # Summarize function of dplyr ---------------------------------------------
 
+library(dplyr)
 
+library(gapminder)
+
+(minigap=gapminder %>% 
+    filter(country %in% c("Canada","Germany"),year>2000) %>% 
+    droplevels()
+    )
+
+minigap %>% 
+  group_by(country) %>% 
+  summarise(lifeExp=mean(lifeExp))
+# now taking summary of more that one variable
+
+minigap %>% 
+  group_by(country) %>% 
+  summarise_at(vars(lifeExp,gdpPercap),mean)
+
+# we'll now correlate life expectancy and year
+
+gapminder %>% 
+  group_by(country) %>% 
+  summarise(cor_life_year=cor(lifeExp,year))
+
+
+# Using nest function of tidyr to create a nested data frame ---------------------------------------------
+
+library(tidyr)
+
+nested_df=gapminder %>% 
+  group_by(country,continent) %>% 
+  nest() %>% 
+  mutate(fit=map(data,~lm(lifeExp~year,data=.x)))
+
+str(nested_df$fit[1:3],max.level = 1)
+
+nested_df$fit[[3]]
+
+nested_df %>% 
+  filter(continent=="Oceania") %>% 
+  .$fit
+
+# create a dataframe with country, continent, coeff, intercept and slope
+
+nested_df %>% 
+  mutate(coefs=map(fit,coef),intercept=map_dbl(coefs,1),slope=map_dbl(coefs,2)) %>% 
+  select(country,continent,intercept, slope)
+  
